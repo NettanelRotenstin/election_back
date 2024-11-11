@@ -21,7 +21,7 @@ export const registerService = async (user: IUser) => {
 
 export const loginService = async (user: loginDTO) => {
     try {
-        const userFromDB = await userSchema.findOne({ userName: user.userName })
+        const userFromDB = await userSchema.findOne({ userName: user.userName }).lean()
         if (!userFromDB) throw new Error(`user not found`)
         const match = await compare(user.password, userFromDB.password)
         if (!match) throw new Error('incorrect details')
@@ -29,8 +29,8 @@ export const loginService = async (user: loginDTO) => {
             userId: userFromDB._id,
             isAdmin: userFromDB.isAdmin,
             userNmae: userFromDB.userName
-        }, process.env.SECRET_JWT!)
-        return userFromDB
+        }, process.env.SECRET_JWT!,{expiresIn:"5m"})
+        return {...userFromDB,token,password:"****"}
     } catch (error) {
         console.log(`error in login`)
     }
