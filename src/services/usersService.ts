@@ -1,15 +1,15 @@
 import { sign } from "jsonwebtoken";
 import userSchema, { IUser } from "../models/userSchema";
-import { loginDTO } from "../types/loginDTO";
+import { LoginDto, ProfileDto } from "../types/loginDTO";
 import { compare, hash } from "bcrypt";
 
 export const registerService = async (user: IUser) => {
     try {
         const encPass = await hash(user.password, 10)
 
-        const { userName, isAdmin, hasVoted, votedFor } = user
+        const { userName,isAdmin } = user
 
-        const dbUser = new userSchema({ userName, password: encPass })
+        const dbUser = new userSchema({ userName, password: encPass ,isAdmin})
 
         return await dbUser.save()
 
@@ -19,7 +19,7 @@ export const registerService = async (user: IUser) => {
     }
 }
 
-export const loginService = async (user: loginDTO) => {
+export const loginService = async (user: LoginDto) => {
     try {
         const userFromDB = await userSchema.findOne({ userName: user.userName }).lean()
         if (!userFromDB) throw new Error(`user not found`)
@@ -35,3 +35,14 @@ export const loginService = async (user: loginDTO) => {
         console.log(`error in login`)
     }
 }
+
+export const getUserData = async (user: ProfileDto) => {
+    try {
+      if (!user.id) throw new Error("Missing user data, [id] is required");
+      const currUser = await userSchema.findById(user.id).lean();
+      return { hasVoted: currUser?.hasVoted, votedFor: currUser?.votedFor };
+    } catch (err) {
+      console.log(err);
+      throw new Error("Can't create new user");
+    }
+  };

@@ -30,10 +30,11 @@ export const ceed = async () => {
             name: "shimu",
             image: "https://randomuser.me/api/portraits/med/men/35.jpg"
         },]
-        for (const c in cands) {
-            const newCand = new candidateSchema()
-            await newCand.save()
-        }
+         
+        cands.map(async (cand) => {
+            const newCAnd = new candidateSchema(cand);
+            await newCAnd.save();
+          });
     } catch (error) {
         console.log("error in ceed candidate")
     }
